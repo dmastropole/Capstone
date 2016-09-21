@@ -1,0 +1,27 @@
+{% extends "main.html" %}
+{% block content %}
+<h1>Price Picker</h1>
+  <div class=metanav>
+
+    <h4>
+      Please enter your housing information:
+    </h4>
+
+    <form id='params' method='post' action='results' >
+      <p>
+    Zip code: <input type='text' name='zipcode' />
+      </p>
+      <p>
+    Number of bedrooms: <input type='text' name='bdrms' />
+      </p>
+      <p>
+    Number of bathrooms: <input type='text' name='baths' />
+      </p>
+      <p>
+    <input type='submit' value='Submit' />
+      </p>
+    </form>
+
+  </div>
+  
+{% endblock %}
