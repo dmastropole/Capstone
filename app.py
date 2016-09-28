@@ -7,6 +7,19 @@ import numpy as np
 import scipy.special
 import pandas as pd
 
+from plotly.offline import download_plotlyjs, init_notebook_mode, plot, iplot
+import plotly.graph_objs as go
+from datetime import datetime
+import pandas as pd
+import os
+
+import myfunctions
+
+
+#from lightning import Lightning
+#lgn = Lightning(local=True)
+#lgn = Lightning(host='https://herokuappname.herokuapp.com')
+
 app = Flask(__name__)
 
 @app.route('/')
@@ -40,6 +53,7 @@ def get_data():
     
     lat = dataset['lat']
     lng = dataset['lng']
+
     coordinates = '(' + str(lng) + ',' + str(lat) +')'
     
     #CRAIGSLIST API
@@ -58,6 +72,15 @@ def get_data():
     prices = [float(i) for i in prices]
     mean_price = np.mean(prices)
     price_str = '%.2f' % mean_price
+    
+    #save prices 
+    data = {'bdrms' : bdrms, 'baths' : baths, 'prices': prices}
+    df = pd.DataFrame(data, columns=['bdrms', 'baths', 'prices'])
+    df.to_csv('./src/prices.csv')
+
+    #latlon = (float(lat),float(lng))
+    #df = scrape_data(latlon)
+    
     
     return render_template('results.html', coordinates=coordinates, data=price_str)
 
