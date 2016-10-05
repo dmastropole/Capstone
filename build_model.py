@@ -36,36 +36,34 @@ class categoryTransformer(sk.base.BaseEstimator, sk.base.TransformerMixin):
         return self.val
 
 #--------------------------------------------------------------------
+#def build_model():
+    #load data
+    f = open('./data/df_data.p', 'r')
+    df = pickle.load(f)          
+    f.close() 
 
-#load data
-f = open('./data/df_data.p', 'r')
-df = pickle.load(f)          
-f.close() 
+    #change data-type of prices and eliminate unreasonable values
+    df['price'] = df['price'].str[1:].astype(int)
+    df = df[df['price'] <= 10000]
 
-#change data-type of prices and eliminate unreasonable values
-df['price'] = df['price'].str[1:].astype(int)
-df = df[df['price'] <= 10000]
+    #split dataframe into predictors and outcomes
+    y = df['price']
+    X = df.drop('price',1) 
 
-#split dataframe into predictors and outcomes
-y = df['price']
-X = df.drop('price',1) 
-
-#build model
-fullModel = pipeline.Pipeline([("col_select", categoryTransformer(['sqft','br','ba'])),
+    #build model
+    fullModel = pipeline.Pipeline([("col_select", categoryTransformer(['sqft','br','ba'])),
                                ("imp",Imputer(missing_values='NaN', strategy='median', axis=0)),
                                ("lin",LinearRegression())
         
     ])
     
-#cross validate
-param_grid_pipeline = {'lin__fit_intercept':[True,False], 'lin__normalize':[True,False]}
+    #cross validate
+    param_grid_pipeline = {'lin__fit_intercept':[True,False], 'lin__normalize':[True,False]}
+    grid = GridSearchCV(fullModel, param_grid_pipeline, cv = 5, n_jobs = -1, verbose=1, scoring = 'mean_squared_error')
+    grid.fit(X, y)
 
-grid = GridSearchCV(fullModel, param_grid_pipeline, cv = 5, n_jobs = -1, verbose=1, scoring = 'mean_squared_error')
-
-grid.fit(X, y)
-
-#save model
-f = open('./data/model.p', 'w')
-pickle.dump(fullModel, f)          
-f.close() 
+    #save model
+    f = open('./data/model.p', 'w')
+    pickle.dump(grid, f)          
+    f.close() 
 

@@ -46,7 +46,7 @@ def scrape_data(latlon):
     if ext == '/i/apartments':
         url_intermediate = url[:-1] + ext
         r = requests.get(url_intermediate)
-        print r.status_code
+        #print r.status_code
         soup = BeautifulSoup(r.text, 'lxml')
         info = soup.select('ul.ul')
         extension = re.findall(r'href="(.*)">all\s+apartments',str(info))
@@ -117,11 +117,11 @@ def scrape_data(latlon):
     df_short = df_full.dropna(subset=['price'])
         
     #save dataframe
-    f = open('df_data.p', 'w')
+    f = open('./data/df_data.p', 'w')
     pickle.dump(df_short, f)          
     f.close()
     
-    df_short.to_csv('data.csv')
+    df_short.to_csv('./data/data.csv')
     
     return df_short
             

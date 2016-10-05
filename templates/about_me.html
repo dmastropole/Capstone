@@ -1,20 +1,23 @@
-{% extends "main.html" %}
+{% extends "base.html" %}
+{% block title %}{% endblock %}
+
 {% block content %}
-  <h1> Dana Mastropole </h> 
-  <br>
-  <br>
-  <p><img src="{{ url_for('static', filename='Mastropole_headshot_cropped_reduced.png' )}}" alt="Headshot" style="float:left;width:200px;margin:10px 10px 10px 10px"> 
-	  <font size="3">
-	  M.S. Physical Oceanography (2015)
-	  <br>
-	  MIT/WHOI Joint Program
-	  <br>
-	  <br>
-	  B.S. Physics (2012)
-	  <br>
-	  Georgetown University
-  	</font>
+<h1 class="h1center">Dana Mastropole</h1>
+<img src="{{ url_for('static', filename='Mastropole_headshot_cropped_reduced.png') }}" class="centerImage" width="200">
+
+<div class="content">
+	<p><font size="3">
+		M.S. Physical Oceanography (2015)
+		<br>
+		MIT/WHOI Joint Program
+		<br>
+		<br>
+		B.S. Physics (2012)
+		<br>
+		Georgetown University
+	</font><p>
+</div>
 	  
-  </p>
+
   
 {% endblock %}

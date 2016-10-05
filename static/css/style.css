@@ -1,0 +1,26 @@
+.content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#mapid { height: 180px; }
+
+.h1center {
+    text-align: center;
+}
+
+
+.center {
+    text-align: center;
+}
+
+
+.centerImage
+{
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+	text-align: center;
+}
+

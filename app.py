@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect
 import requests
 import simplejson as json
 import re
+import pickle
 
 import numpy as np
 import scipy.special
@@ -14,17 +15,43 @@ import pandas as pd
 import os
 
 import myfunctions
+#import build_model
 
+#machine learning
+import sklearn as sk
+from sklearn.base import BaseEstimator, RegressorMixin 
+from sklearn import neighbors
+from sklearn import ensemble, feature_extraction
+from sklearn.grid_search import GridSearchCV
+from sklearn import neighbors, cross_validation, grid_search, linear_model
+from sklearn.linear_model import LinearRegression, LassoCV
+from sklearn.cross_validation import train_test_split
+from sklearn.feature_extraction import DictVectorizer
+from sklearn import pipeline
+from sklearn.preprocessing import Imputer
 
-#from lightning import Lightning
-#lgn = Lightning(local=True)
-#lgn = Lightning(host='https://herokuappname.herokuapp.com')
+#--------------------------------------------------------------------
+
+class categoryTransformer(sk.base.BaseEstimator, sk.base.TransformerMixin):
+
+    def __init__(self, colname):
+        self.colname = colname
+        pass
+        
+    def fit(self, X, y=None):
+        return self
+
+    def transform(self, X):      
+        self.val = X[self.colname]        
+        return self.val
+
+#--------------------------------------------------------------------
 
 app = Flask(__name__)
 
 @app.route('/')
 def main():
-  return render_template('main.html')
+  return render_template('index.html')
 
 @app.route('/about_tool')
 def about_tool():
@@ -39,50 +66,41 @@ def tool():
 
 @app.route('/results', methods=['GET', 'POST'])
 def get_data():
-    zipcode = request.form['zipcode']
+    address = request.form['address']
     bdrms = request.form['bdrms']
     baths = request.form['baths']
+    sqfootage = request.form['sqfootage']
     
-    #ZIPCODE API
-    api_key = 'htn05QPh3vokALrY8T2RgaOd2Um4hMtzfQzlGpCKV14vMvtUpwMFHBTJvgON2hni'
-    url = 'https://www.zipcodeapi.com/rest/'
-    url = url + api_key + '/info.json/' + zipcode +'/degrees'
+    #Get lat and lon from address
+    address = '+'.join(address.split())
+    api_key = '&key=AIzaSyCyYqXfiJLjQwRSS9PvKpWvfvnxP0A6Sw0'
+    base_url = 'https://maps.googleapis.com/maps/api/geocode/json?address='
+    full_url = base_url + address + api_key
+    r = requests.get(full_url)
+    geo_data = r.content
+    #geo_data = geo_data.decode("utf-8") 
+    latlon = re.findall(r'"location"\s+:\s+{\s+"lat"\s+:\s+(.*),\s+"lng"\s+:\s+(.*)\s+}', geo_data)
+    lat = float(latlon[0][0].strip("'"))
+    lng = float(latlon[0][1].strip("'"))
     
-    r = requests.get(url=url)
-    dataset = json.loads(r.content)
-    
-    lat = dataset['lat']
-    lng = dataset['lng']
-
-    coordinates = '(' + str(lng) + ',' + str(lat) +')'
-    
-    #CRAIGSLIST API
-    url = 'http://www.rentrent.org/RENT/Ads.aspx?'
-    xmin = lng - 0.1
-    xmax = lng + 0.1
-    ymin = lat - 0.1
-    ymax = lat + 0.1
-    
-    url = url + 'xmin=' + str(xmin) + '&ymin=' + str(ymin) + '&xmax=' + str(xmax) + '&ymax=' + str(ymax) + '&bd=' + str(bdrms) + '&ba=' + str(baths) + '&pets=-1&type=2&throwErrorIfOverLimit=false&callback=xxx'
-    r = requests.get(url=url)
-    data = r.content
-    prices = re.findall(r'&#x0024;(\d+)', data)
-    
-    #convert prices to integers
-    prices = [float(i) for i in prices]
-    mean_price = np.mean(prices)
-    price_str = '%.2f' % mean_price
-    
-    #save prices 
-    data = {'bdrms' : bdrms, 'baths' : baths, 'prices': prices}
-    df = pd.DataFrame(data, columns=['bdrms', 'baths', 'prices'])
-    df.to_csv('./src/prices.csv')
-
+    #Scrape craigslist using lat and lon
     #latlon = (float(lat),float(lng))
     #df = scrape_data(latlon)
     
+    #Build model
+    #build_model()
     
-    return render_template('results.html', coordinates=coordinates, data=price_str)
+    #Predict prices
+    X = pd.DataFrame({'br':float(bdrms), 'ba':float(baths), 'sqft':float(sqfootage)}, index = range(1))
+    
+    f = open('./data/model.p', 'r')
+    model = pickle.load(f)          
+    f.close()
+
+    price = model.predict(X)
+    price_str = '%.2f' % price[0]
+
+    return render_template('results.html', data=price_str)
 
 @app.route('/about_me')
 def about_me():

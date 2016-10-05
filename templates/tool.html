@@ -1,4 +1,10 @@
-{% extends "main.html" %}
+{% extends "base.html" %}
+{% block title %}{% endblock %}
+
+{% block head %}
+<link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+{% endblock %}
+
 {% block content %}
 <h1>Price Picker</h1>
   <div class=metanav>
@@ -9,13 +15,16 @@
 
     <form id='params' method='post' action='results' >
       <p>
-    Zip code: <input type='text' name='zipcode' />
+    Address: <input type='text' name='address' />
       </p>
       <p>
     Number of bedrooms: <input type='text' name='bdrms' />
       </p>
       <p>
     Number of bathrooms: <input type='text' name='baths' />
+      </p>
+      <p>
+    Square footage: <input type='text' name='sqfootage' />
       </p>
       <p>
     <input type='submit' value='Submit' />

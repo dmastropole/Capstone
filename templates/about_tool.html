@@ -1,9 +1,9 @@
-{% extends "main.html" %}
+{% extends "base.html" %}
+{% block title %}{% endblock %}
+
 {% block content %}
-  <h1> Exploratory Data Analysis </h> 
-	  <br>
-	  <br>
-	  <p><img src="{{ url_for('static', filename='price_bdr.png' )}}" alt="Price_Bedroom" style="width:800px;">
-	  </p>
+<h1 class="h1center">Exploratory Data Analysis</h1>
+<img src="{{ url_for('static', filename='price_bdr.png') }}" class="centerImage" width="500">
+
   
 {% endblock %}

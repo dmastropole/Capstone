@@ -77,8 +77,8 @@ for index, row in df_new.iterrows():
         df_new.set_value(index,'lat_lon',latlon[0])
         
 #------------------ Save
-f = open('state_regions_df.p', 'w')
+f = open('./data/state_regions_df.p', 'w')
 pickle.dump(df_new, f)          
 f.close() 
 
-df_new.to_csv('states_regions.csv')
+df_new.to_csv('./data/states_regions.csv')
