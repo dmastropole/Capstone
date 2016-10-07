@@ -90,7 +90,7 @@ def get_data():
     #Build model
     #build_model()
     
-    #Predict prices
+    #Predict prices------------------------------------------------
     X = pd.DataFrame({'br':float(bdrms), 'ba':float(baths), 'sqft':float(sqfootage)}, index = range(1))
     
     f = open('./data/model.p', 'r')
@@ -99,8 +99,20 @@ def get_data():
 
     price = model.predict(X)
     price_str = '%.2f' % price[0]
+    
+    #Get prices for histogram----------------------------------------
+    f = open('./data/df_data.p', 'r')
+    df = pickle.load(f)          
+    f.close()
+    
+    df['price'] = df['price'].str[1:].astype(int)
+    df = df[df['price'] <= 10000]
+    
+    dataDC = df[df['subregion'] == 'district of columbia']['price'].tolist()
+    dataMD = df[df['subregion'] == 'maryland']['price'].tolist()
+    dataVA = df[df['subregion'] == 'northern virginia']['price'].tolist()
 
-    return render_template('results.html', data=price_str)
+    return render_template('results.html', data=price_str, dataDC=dataDC, dataMD=dataMD, dataVA=dataVA)
 
 @app.route('/about_me')
 def about_me():

@@ -4,13 +4,13 @@
 
 	<link rel="stylesheet" href="https://cdn.rawgit.com/novus/nvd3/v1.8.1/build/nv.d3.css">
 	<script src="https://d3js.org/d3.v3.js"></script>
-	//<script src="https://cdn.rawgit.com/novus/nvd3/v1.8.1/build/nv.d3.min.js"></script>
+	<script src="https://cdn.rawgit.com/novus/nvd3/v1.8.1/build/nv.d3.min.js"></script>
 
 <h1>Estimated Price:  ${{data}}</h1>
   <br>
   <br>
   <div id="chart1" class='with-3d-shadow with-transitions'>
-      <svg></svg>
+      <svg viewBox="0 0 60 55" preserveAspectRatio="xMidYMin slice" style="width: 100%; padding-bottom: 92%; height: 1px; overflow: visible"></svg>
   </div>
   <script>
   
@@ -19,11 +19,12 @@
   var m = {top: 30, right: 60, bottom: 50, left: 70}
     , h = 400 - m.top - m.bottom
     , w = 400 - m.left - m.right
-    , numBins = 10;
-  var x = d3.scale.linear().domain([0, 10]).range([0, w]);
+    , numBins = 20;
+  var x = d3.scale.linear().domain([0, 10000]).range([0, w]);
   
   //convert data into correct format for plotting
   
+  /*
   var dataDC = [];
   var dataMD = [];
   var dataVA = [];
@@ -32,16 +33,17 @@
 	  dataMD.push(Math.round(Math.random() * t))
 	  dataVA.push(Math.round(Math.random() * t))
   }
+  */
   
   var convertedData = [];
   
-  binDataDC = d3.layout.histogram().bins(x.ticks(numBins))(dataDC);
-  binDataMD = d3.layout.histogram().bins(x.ticks(numBins))(dataMD);
-  binDataVA = d3.layout.histogram().bins(x.ticks(numBins))(dataVA);
+  binDataDC = d3.layout.histogram().bins(x.ticks(numBins))({{dataDC}});
+  binDataMD = d3.layout.histogram().bins(x.ticks(numBins))({{dataMD}});
+  binDataVA = d3.layout.histogram().bins(x.ticks(numBins))({{dataVA}});
   
-  var histObjDC = {'key': 'DC', 'values': []};
-  var histObjMD = {'key': 'MD', 'values': []};
-  var histObjVA = {'key': 'VA', 'values': []};
+  var histObjDC = {'key': 'DC', 'values': [], 'color':'#1b9e77'};
+  var histObjMD = {'key': 'MD', 'values': [], 'color':'#d95f02'};
+  var histObjVA = {'key': 'VA', 'values': [], 'color':'#7570b3'};
   
   for(var i = 0; i < binDataDC.length; i++){
 	  histObjDC.values.push({'x':binDataDC[i].x,'y':binDataDC[i].y});
@@ -53,11 +55,9 @@
   convertedData.push(histObjMD);
   convertedData.push(histObjVA);
 
-  //plot
-  var chart;
+  //plot	
   nv.addGraph(function() {
       chart = nv.models.multiBarChart()
-          .barColor(d3.scale.category20().range())
           .duration(300)
           .margin({bottom: 100, left: 70})
           .rotateLabels(45)
@@ -68,12 +68,12 @@
           .axisLabel("Monthly Rental Price")
           .axisLabelDistance(35)
           .showMaxMin(false)
-          .tickFormat(d3.format(',.6f'))
+          .tickFormat(d3.format(',.2f'))
       ;
       chart.yAxis
           .axisLabel("Number of Apartments")
           .axisLabelDistance(-5)
-          .tickFormat(d3.format(',.01f'))
+          .tickFormat(d3.format(',f'))
       ;
       chart.dispatch.on('renderEnd', function(){
           nv.log('Render Complete');
