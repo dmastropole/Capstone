@@ -2,50 +2,94 @@
 {% block title %}{% endblock %}
 {% block content %}
 
-<link rel="stylesheet" href="https://cdn.rawgit.com/novus/nvd3/v1.8.1/build/nv.d3.css">
-<script src="https://d3js.org/d3.v4.js"></script>
-<script src="https://cdn.rawgit.com/novus/nvd3/v1.8.1/build/nv.d3.min.js"></script>
+	<link rel="stylesheet" href="https://cdn.rawgit.com/novus/nvd3/v1.8.1/build/nv.d3.css">
+	<script src="https://d3js.org/d3.v3.js"></script>
+	//<script src="https://cdn.rawgit.com/novus/nvd3/v1.8.1/build/nv.d3.min.js"></script>
 
 <h1>Estimated Price:  ${{data}}</h1>
   <br>
   <br>
-<h1>Histogram of Prices</h1>
-  <br>
-  <br>
+  <div id="chart1" class='with-3d-shadow with-transitions'>
+      <svg></svg>
+  </div>
   <script>
+  
+
+  //define margins for chart, histogram bin size, and the x scale for the bins
+  var m = {top: 30, right: 60, bottom: 50, left: 70}
+    , h = 400 - m.top - m.bottom
+    , w = 400 - m.left - m.right
+    , numBins = 10;
+  var x = d3.scale.linear().domain([0, 10]).range([0, w]);
+  
+  //convert data into correct format for plotting
+  
+  var dataDC = [];
+  var dataMD = [];
+  var dataVA = [];
+  for (var i=0, t=10000; i<t; i++) {
+      dataDC.push(Math.round(Math.random() * t))
+	  dataMD.push(Math.round(Math.random() * t))
+	  dataVA.push(Math.round(Math.random() * t))
+  }
+  
+  var convertedData = [];
+  
+  binDataDC = d3.layout.histogram().bins(x.ticks(numBins))(dataDC);
+  binDataMD = d3.layout.histogram().bins(x.ticks(numBins))(dataMD);
+  binDataVA = d3.layout.histogram().bins(x.ticks(numBins))(dataVA);
+  
+  var histObjDC = {'key': 'DC', 'values': []};
+  var histObjMD = {'key': 'MD', 'values': []};
+  var histObjVA = {'key': 'VA', 'values': []};
+  
+  for(var i = 0; i < binDataDC.length; i++){
+	  histObjDC.values.push({'x':binDataDC[i].x,'y':binDataDC[i].y});
+	  histObjMD.values.push({'x':binDataMD[i].x,'y':binDataMD[i].y}); 
+	  histObjVA.values.push({'x':binDataVA[i].x,'y':binDataVA[i].y});  
+  }
+  
+  convertedData.push(histObjDC);
+  convertedData.push(histObjMD);
+  convertedData.push(histObjVA);
+
+  //plot
+  var chart;
   nv.addGraph(function() {
-      var chart = nv.models.multiBarChart()
-        .transitionDuration(350)
-        .reduceXTicks(true)   //If 'false', every single x-axis tick label will be rendered.
-        .rotateLabels(0)      //Angle to rotate x-axis labels.
-        .showControls(true)   //Allow user to switch between 'Grouped' and 'Stacked' mode.
-        .groupSpacing(0.1)    //Distance between each group of bars.
+      chart = nv.models.multiBarChart()
+          .barColor(d3.scale.category20().range())
+          .duration(300)
+          .margin({bottom: 100, left: 70})
+          .rotateLabels(45)
+          .groupSpacing(0.1)
       ;
-
+      chart.reduceXTicks(false).staggerLabels(true);
       chart.xAxis
-          .tickFormat(d3.format(',f'));
-
+          .axisLabel("Monthly Rental Price")
+          .axisLabelDistance(35)
+          .showMaxMin(false)
+          .tickFormat(d3.format(',.6f'))
+      ;
       chart.yAxis
-          .tickFormat(d3.format(',.1f'));
-
+          .axisLabel("Number of Apartments")
+          .axisLabelDistance(-5)
+          .tickFormat(d3.format(',.01f'))
+      ;
+      chart.dispatch.on('renderEnd', function(){
+          nv.log('Render Complete');
+      });
       d3.select('#chart1 svg')
-          .datum(exampleData())
+          .datum(convertedData)
           .call(chart);
-
       nv.utils.windowResize(chart.update);
-
+      chart.dispatch.on('stateChange', function(e) {
+          nv.log('New State:', JSON.stringify(e));
+      });
+      chart.state.dispatch.on('change', function(state){
+          nv.log('state', JSON.stringify(state));
+      });
       return chart;
   });
-
-  //Generate some nice data.
-  function exampleData() {
-    return stream_layers(3,10+Math.random()*100,.1).map(function(data, i) {
-      return {
-        key: 'Stream #' + i,
-        values: data
-      };
-    });
-  }
   </script>
   
   
