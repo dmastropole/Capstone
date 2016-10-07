@@ -9,6 +9,7 @@
 
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
+	<script src="http://code.jquery.com/jquery-latest.min.js" type="text/javascript"></script>
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
 	
 	<!-- <link rel="shortcut icon" href="{{ url_for('static', filename='ico/favicon.ico') }}"> -->
@@ -37,7 +38,7 @@
 	    <!-- Collect the nav links, forms, and other content for toggling -->
 	    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
 	      <ul class="nav navbar-nav">
-			<li class="active"><a href="/tool">Price Picker</a></li>
+			<li><a href="/tool">Price Picker</a></li>
 			<li><a href="/about_tool">About Price Picker</a></li>
 			<li><a href="/about_me">About Me</a></li> 
 	      </ul>
@@ -45,6 +46,16 @@
 	    </div><!-- /.navbar-collapse -->
 	  </div><!-- /.container-fluid -->
 	</nav>
+	
+	<!--
+	<script>
+	    $(".nav li").on("click", function() {
+	      $(".nav li").removeClass("active");
+	      $(this).addClass("active");
+	    });
+
+	</script>
+	-->
 
 	{% endblock %}
 

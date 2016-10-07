@@ -10,8 +10,10 @@ import pandas as pd
 
 from plotly.offline import download_plotlyjs, init_notebook_mode, plot, iplot
 import plotly.graph_objs as go
+
+import geopy
+import geopy.distance
 from datetime import datetime
-import pandas as pd
 import os
 
 import myfunctions
@@ -49,6 +51,7 @@ class categoryTransformer(sk.base.BaseEstimator, sk.base.TransformerMixin):
 
 app = Flask(__name__)
 
+
 @app.route('/')
 def main():
   return render_template('index.html')
@@ -71,6 +74,11 @@ def get_data():
     baths = request.form['baths']
     sqfootage = request.form['sqfootage']
     
+    if not address or not bdrms or not baths or not sqfootage:
+        #return redirect(url_for('error_page', message='Please fill in all of the fields.'))
+        #return redirect('/error_page', message='Please fill in all of the fields.')
+        return redirect('/error_page')
+    
     #Get lat and lon from address
     address = '+'.join(address.split())
     api_key = '&key=AIzaSyCyYqXfiJLjQwRSS9PvKpWvfvnxP0A6Sw0'
@@ -78,20 +86,30 @@ def get_data():
     full_url = base_url + address + api_key
     r = requests.get(full_url)
     geo_data = r.content
-    #geo_data = geo_data.decode("utf-8") 
     latlon = re.findall(r'"location"\s+:\s+{\s+"lat"\s+:\s+(.*),\s+"lng"\s+:\s+(.*)\s+}', geo_data)
     lat = float(latlon[0][0].strip("'"))
     lng = float(latlon[0][1].strip("'"))
     
-    #Scrape craigslist using lat and lon
-    #latlon = (float(lat),float(lng))
-    #df = scrape_data(latlon)
+    #make sure that address is within 100 km of DC center (capitol)
+    lat_cap = 38.89
+    lng_cap = -77.01
+    dist = geopy.distance.distance((lat,lng), (lat_cap,lng_cap)).km
+    if dist > 100:
+        #return redirect(url_for('error_page', message='Your apartment is outside the DC metropolitan area.'))
+        #return redirect('/error_page', message='Your apartment is outside the DC metropolitan area.')
+        return redirect('/error_page')
     
-    #Build model
-    #build_model()
+    #get "state" from address
+    subregion_abbr = re.findall(r'"short_name"\s+:\s+"(.*)",\s+"types"\s+:\s+\[\s+"administrative_area_level_1"', geo_data)
+    if subregion_abbr[0] == 'MD':
+        subregion = 'maryland'
+    elif subregion_abbr[0] == 'VA':
+        subregion = 'northern virginia'
+    else:
+        subregion = 'district of columbia'
     
     #Predict prices------------------------------------------------
-    X = pd.DataFrame({'br':float(bdrms), 'ba':float(baths), 'sqft':float(sqfootage)}, index = range(1))
+    X = pd.DataFrame({'br':float(bdrms), 'ba':float(baths), 'sqft':float(sqfootage), 'subregion':subregion}, index = range(1))
     
     f = open('./data/model.p', 'r')
     model = pickle.load(f)          
@@ -114,6 +132,10 @@ def get_data():
 
     return render_template('results.html', data=price_str, dataDC=dataDC, dataMD=dataMD, dataVA=dataVA)
 
+@app.route('/error_page')
+def error_page():
+  return render_template('error_page.html')
+  
 @app.route('/about_me')
 def about_me():
   return render_template('about_me.html')
