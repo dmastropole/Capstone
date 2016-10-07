@@ -22,19 +22,7 @@
     , numBins = 20;
   var x = d3.scale.linear().domain([0, 10000]).range([0, w]);
   
-  //convert data into correct format for plotting
-  
-  /*
-  var dataDC = [];
-  var dataMD = [];
-  var dataVA = [];
-  for (var i=0, t=10000; i<t; i++) {
-      dataDC.push(Math.round(Math.random() * t))
-	  dataMD.push(Math.round(Math.random() * t))
-	  dataVA.push(Math.round(Math.random() * t))
-  }
-  */
-  
+  //convert data into correct format for plotting  
   var convertedData = [];
   
   binDataDC = d3.layout.histogram().bins(x.ticks(numBins))({{dataDC}});
