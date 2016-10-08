@@ -75,9 +75,7 @@ def get_data():
     sqfootage = request.form['sqfootage']
     
     if not address or not bdrms or not baths or not sqfootage:
-        #return redirect(url_for('error_page', message='Please fill in all of the fields.'))
-        #return redirect('/error_page', message='Please fill in all of the fields.')
-        return redirect('/error_page')
+        return render_template('error_page.html', message='Please fill in all of the fields.')
     
     #Get lat and lon from address
     address = '+'.join(address.split())
@@ -86,18 +84,19 @@ def get_data():
     full_url = base_url + address + api_key
     r = requests.get(full_url)
     geo_data = r.content
+    if len(geo_data) == 52:
+        return render_template('error_page.html', message="Your address doesn't seem to exist.")
     latlon = re.findall(r'"location"\s+:\s+{\s+"lat"\s+:\s+(.*),\s+"lng"\s+:\s+(.*)\s+}', geo_data)
     lat = float(latlon[0][0].strip("'"))
     lng = float(latlon[0][1].strip("'"))
+    
     
     #make sure that address is within 100 km of DC center (capitol)
     lat_cap = 38.89
     lng_cap = -77.01
     dist = geopy.distance.distance((lat,lng), (lat_cap,lng_cap)).km
     if dist > 100:
-        #return redirect(url_for('error_page', message='Your apartment is outside the DC metropolitan area.'))
-        #return redirect('/error_page', message='Your apartment is outside the DC metropolitan area.')
-        return redirect('/error_page')
+        return render_template('error_page.html', message='Your apartment is outside the DC metropolitan area.')
     
     #get "state" from address
     subregion_abbr = re.findall(r'"short_name"\s+:\s+"(.*)",\s+"types"\s+:\s+\[\s+"administrative_area_level_1"', geo_data)
@@ -131,10 +130,6 @@ def get_data():
     dataVA = df[df['subregion'] == 'northern virginia']['price'].tolist()
 
     return render_template('results.html', data=price_str, dataDC=dataDC, dataMD=dataMD, dataVA=dataVA)
-
-@app.route('/error_page')
-def error_page():
-  return render_template('error_page.html')
   
 @app.route('/about_me')
 def about_me():
